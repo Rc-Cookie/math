@@ -1,5 +1,6 @@
 package com.github.rccookie.math;
 
+import com.github.rccookie.json.JsonDeserialization;
 import com.github.rccookie.util.ArgumentOutOfRangeException;
 
 import org.jetbrains.annotations.Range;
@@ -9,6 +10,40 @@ import org.jetbrains.annotations.Range;
  */
 @SuppressWarnings({"NewClassNamingConvention", "DuplicatedCode"})
 public final class float4x4 extends constFloat4x4 {
+
+    static {
+        JsonDeserialization.register(float4x4.class, json -> {
+            if(json.isArray()) {
+                if(json.get(0).isArray())
+                    return fromRows(json.get(0).as(float4.class), json.get(1).as(float4.class), json.get(2).as(float4.class), json.get(3).as(float4.class));
+                return fromArray(json.as(float[].class));
+            }
+            if(json.contains("a"))
+                return new float4x4(json.get("a").asFloat(), json.get("b").asFloat(), json.get("c").asFloat(), json.get("d").asFloat(),
+                        json.get("e").asFloat(), json.get("f").asFloat(), json.get("g").asFloat(), json.get("h").asFloat(),
+                        json.get("i").asFloat(), json.get("j").asFloat(), json.get("k").asFloat(), json.get("l").asFloat(),
+                        json.get("m").asFloat(), json.get("n").asFloat(), json.get("o").asFloat(), json.get("p").asFloat());
+            if(json.contains("a00"))
+                return new float4x4(json.get("a00").asFloat(), json.get("a01").asFloat(), json.get("a02").asFloat(), json.get("a03").asFloat(),
+                        json.get("a10").asFloat(), json.get("a11").asFloat(), json.get("a12").asFloat(), json.get("a13").asFloat(),
+                        json.get("a20").asFloat(), json.get("a21").asFloat(), json.get("a22").asFloat(), json.get("a23").asFloat(),
+                        json.get("a30").asFloat(), json.get("a31").asFloat(), json.get("a32").asFloat(), json.get("a33").asFloat());
+            if(json.contains("m00"))
+                return new float4x4(json.get("m00").asFloat(), json.get("m01").asFloat(), json.get("m02").asFloat(), json.get("m03").asFloat(),
+                        json.get("m10").asFloat(), json.get("m11").asFloat(), json.get("m12").asFloat(), json.get("m13").asFloat(),
+                        json.get("m20").asFloat(), json.get("m21").asFloat(), json.get("m22").asFloat(), json.get("m23").asFloat(),
+                        json.get("m30").asFloat(), json.get("m31").asFloat(), json.get("m32").asFloat(), json.get("m33").asFloat());
+            if(json.contains("a11"))
+                return new float4x4(json.get("a11").asFloat(), json.get("a12").asFloat(), json.get("a13").asFloat(), json.get("a14").asFloat(),
+                        json.get("a21").asFloat(), json.get("a22").asFloat(), json.get("a23").asFloat(), json.get("a24").asFloat(),
+                        json.get("a31").asFloat(), json.get("a32").asFloat(), json.get("a33").asFloat(), json.get("a34").asFloat(),
+                        json.get("a41").asFloat(), json.get("a42").asFloat(), json.get("a43").asFloat(), json.get("a44").asFloat());
+            return new float4x4(json.get("m11").asFloat(), json.get("m12").asFloat(), json.get("m13").asFloat(), json.get("m14").asFloat(),
+                    json.get("m21").asFloat(), json.get("m22").asFloat(), json.get("m23").asFloat(), json.get("m24").asFloat(),
+                    json.get("m31").asFloat(), json.get("m32").asFloat(), json.get("m33").asFloat(), json.get("m34").asFloat(),
+                    json.get("m41").asFloat(), json.get("m42").asFloat(), json.get("m43").asFloat(), json.get("m44").asFloat());
+        });
+    }
 
     float4x4() { }
 
@@ -28,6 +63,8 @@ public final class float4x4 extends constFloat4x4 {
               a20, a21, a22, a23,
               a30, a31, a32, a33);
     }
+
+
 
     /**
      * Sets this matrix to the given component values.
@@ -80,6 +117,64 @@ public final class float4x4 extends constFloat4x4 {
         a31 = m.a31;
         a32 = m.a32;
         a33 = m.a33;
+        return this;
+    }
+
+    /**
+     * Sets this matrix to the specified values.
+     *
+     * @param row0 The component values for the first row
+     * @param row1 The component values for the second row
+     * @param row2 The component values for the third row
+     * @param row3 The component values for the fourth row
+     * @return This matrix
+     */
+    public float4x4 setRows(constFloat4 row0, constFloat4 row1, constFloat4 row2, constFloat4 row3) {
+        this.a00 = row0.x;
+        this.a01 = row0.y;
+        this.a02 = row0.z;
+        this.a03 = row0.w;
+        this.a10 = row1.x;
+        this.a11 = row1.y;
+        this.a12 = row1.z;
+        this.a13 = row1.w;
+        this.a20 = row2.x;
+        this.a21 = row2.y;
+        this.a22 = row2.z;
+        this.a23 = row2.w;
+        this.a30 = row3.x;
+        this.a31 = row3.y;
+        this.a32 = row3.z;
+        this.a33 = row3.w;
+        return this;
+    }
+
+    /**
+     * Sets this matrix to the specified values.
+     *
+     * @param column0 The component values for the first column
+     * @param column1 The component values for the second column
+     * @param column2 The component values for the third column
+     * @param column3 The component values for the fourth column
+     * @return This matrix
+     */
+    public float4x4 setColumns(constFloat4 column0, constFloat4 column1, constFloat4 column2, constFloat4 column3) {
+        this.a00 = column0.x;
+        this.a10 = column0.y;
+        this.a20 = column0.z;
+        this.a30 = column0.w;
+        this.a01 = column1.x;
+        this.a11 = column1.y;
+        this.a21 = column1.z;
+        this.a31 = column1.w;
+        this.a02 = column2.x;
+        this.a12 = column2.y;
+        this.a22 = column2.z;
+        this.a32 = column2.w;
+        this.a03 = column3.x;
+        this.a13 = column3.y;
+        this.a23 = column3.z;
+        this.a33 = column3.w;
         return this;
     }
 

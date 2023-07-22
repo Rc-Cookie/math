@@ -4,10 +4,12 @@ import java.util.Arrays;
 
 import com.github.rccookie.json.JsonArray;
 import com.github.rccookie.json.JsonDeserialization;
+import com.github.rccookie.json.JsonObject;
 import com.github.rccookie.json.JsonSerializable;
 import com.github.rccookie.util.ArgumentOutOfRangeException;
 import com.github.rccookie.util.Cloneable;
 
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Range;
 
@@ -20,9 +22,12 @@ import static java.lang.Math.abs;
 public class constInt2 implements Cloneable<int2>, JsonSerializable {
 
     static {
-        JsonDeserialization.register(constInt2.class, json -> new constInt2(
+        JsonDeserialization.register(constInt2.class, json -> json.isArray() ? new constInt2(
                 json.get(0).asInt(),
                 json.get(1).asInt()
+        ) : new constInt2(
+                json.get("x").asInt(),
+                json.get("y").asInt()
         ));
     }
 
@@ -70,7 +75,7 @@ public class constInt2 implements Cloneable<int2>, JsonSerializable {
     /**
      * Creates a new vector with all components set to the given value.
      *
-     * @param xyz The value for each component
+     * @param xy The value for each component
      */
     public constInt2(int xy) {
         x = y = xy;
@@ -150,8 +155,18 @@ public class constInt2 implements Cloneable<int2>, JsonSerializable {
      * @return This vector encoded as json
      */
     @Override
+    @Contract(pure = true)
     public Object toJson() {
-        return new JsonArray(x,y);
+        return new JsonObject("x", x, "y", y);
+    }
+
+    /**
+     * Returns a json array representation of this vector.
+     *
+     * @return This vector encoded as json array
+     */
+    public JsonArray toJsonArray() {
+        return new JsonArray(x, y);
     }
 
 

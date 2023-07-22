@@ -14,11 +14,16 @@ import org.jetbrains.annotations.Range;
 public final class float4 extends constFloat4 {
 
     static {
-        JsonDeserialization.register(float4.class, json -> new float4(
+        JsonDeserialization.register(float4.class, json -> json.isArray() ? new float4(
                 json.get(0).asFloat(),
                 json.get(1).asFloat(),
                 json.get(2).asFloat(),
                 json.get(3).asFloat()
+        ) : new float4(
+                json.get("x").asFloat(),
+                json.get("y").asFloat(),
+                json.get("z").asFloat(),
+                json.get("w").asFloat()
         ));
     }
 

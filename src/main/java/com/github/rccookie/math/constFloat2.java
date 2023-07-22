@@ -4,6 +4,7 @@ import java.util.Arrays;
 
 import com.github.rccookie.json.JsonArray;
 import com.github.rccookie.json.JsonDeserialization;
+import com.github.rccookie.json.JsonObject;
 import com.github.rccookie.json.JsonSerializable;
 import com.github.rccookie.util.ArgumentOutOfRangeException;
 import com.github.rccookie.util.Cloneable;
@@ -21,9 +22,12 @@ import static java.lang.Math.abs;
 public class constFloat2 implements Cloneable<float2>, JsonSerializable {
 
     static {
-        JsonDeserialization.register(constFloat2.class, json -> new constFloat2(
+        JsonDeserialization.register(constFloat2.class, json -> json.isArray() ? new constFloat2(
                 json.get(0).asFloat(),
                 json.get(1).asFloat()
+        ) : new constFloat2(
+                json.get("x").asFloat(),
+                json.get("y").asFloat()
         ));
     }
 
@@ -169,8 +173,18 @@ public class constFloat2 implements Cloneable<float2>, JsonSerializable {
      * @return This vector encoded as json
      */
     @Override
+    @Contract(pure = true)
     public Object toJson() {
-        return new JsonArray(x,y);
+        return new JsonObject("x", x, "y", y);
+    }
+
+    /**
+     * Returns a json array representation of this vector.
+     *
+     * @return This vector encoded as json array
+     */
+    public JsonArray toJsonArray() {
+        return new JsonArray(x, y);
     }
 
 

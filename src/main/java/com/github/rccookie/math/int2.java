@@ -13,9 +13,12 @@ import org.jetbrains.annotations.Range;
 public class int2 extends constInt2 {
 
     static {
-        JsonDeserialization.register(int2.class, json -> new int2(
+        JsonDeserialization.register(int2.class, json -> json.isArray() ? new int2(
                 json.get(0).asInt(),
                 json.get(1).asInt()
+        ) : new int2(
+                json.get("x").asInt(),
+                json.get("y").asInt()
         ));
     }
 

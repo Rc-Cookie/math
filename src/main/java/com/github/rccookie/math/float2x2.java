@@ -1,5 +1,6 @@
 package com.github.rccookie.math;
 
+import com.github.rccookie.json.JsonDeserialization;
 import com.github.rccookie.util.ArgumentOutOfRangeException;
 
 import org.jetbrains.annotations.Range;
@@ -9,6 +10,30 @@ import org.jetbrains.annotations.Range;
  */
 @SuppressWarnings("NewClassNamingConvention")
 public final class float2x2 extends constFloat2x2 {
+
+    static {
+        JsonDeserialization.register(float2x2.class, json -> {
+            if(json.isArray()) {
+                if(json.get(0).isArray())
+                    return fromRows(json.get(0).as(float2.class), json.get(1).as(float2.class));
+                return fromArray(json.as(float[].class));
+            }
+            if(json.contains("a"))
+                return new float2x2(json.get("a").asFloat(), json.get("b").asFloat(),
+                        json.get("c").asFloat(), json.get("d").asFloat());
+            if(json.contains("a00"))
+                return new float2x2(json.get("a00").asFloat(), json.get("a01").asFloat(),
+                        json.get("a10").asFloat(), json.get("a11").asFloat());
+            if(json.contains("m00"))
+                return new float2x2(json.get("m00").asFloat(), json.get("m01").asFloat(),
+                        json.get("m10").asFloat(), json.get("m11").asFloat());
+            if(json.contains("a11"))
+                return new float2x2(json.get("a11").asFloat(), json.get("a12").asFloat(),
+                        json.get("a21").asFloat(), json.get("a22").asFloat());
+            return new float2x2(json.get("m11").asFloat(), json.get("m12").asFloat(),
+                    json.get("m21").asFloat(), json.get("m22").asFloat());
+        });
+    }
 
     float2x2() { }
 
@@ -53,6 +78,36 @@ public final class float2x2 extends constFloat2x2 {
         b = m.b;
         c = m.c;
         d = m.d;
+        return this;
+    }
+
+    /**
+     * Sets this matrix to the specified values.
+     *
+     * @param ab The component values for the first row
+     * @param cd The component values for the second row
+     * @return This matrix
+     */
+    public float2x2 setRows(constFloat2 ab, constFloat2 cd) {
+        a = ab.x;
+        b = ab.y;
+        c = cd.x;
+        d = cd.y;
+        return this;
+    }
+
+    /**
+     * Sets this matrix to the specified values.
+     *
+     * @param ac The component values for the first column
+     * @param bd The component values for the second column
+     * @return This matrix
+     */
+    public float2x2 setColumns(constFloat2 ac, constFloat2 bd) {
+        a = ac.x;
+        b = bd.x;
+        c = ac.y;
+        d = bd.y;
         return this;
     }
 

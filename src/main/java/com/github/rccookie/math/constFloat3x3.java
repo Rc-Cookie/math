@@ -3,6 +3,7 @@ package com.github.rccookie.math;
 import java.util.Arrays;
 
 import com.github.rccookie.json.JsonArray;
+import com.github.rccookie.json.JsonDeserialization;
 import com.github.rccookie.json.JsonSerializable;
 import com.github.rccookie.util.ArgumentOutOfRangeException;
 import com.github.rccookie.util.Cloneable;
@@ -15,8 +16,38 @@ import static java.lang.Math.abs;
 /**
  * A 3x3 float matrix with read-only access.
  */
-@SuppressWarnings({"NewClassNamingConvention", "DuplicatedCode"})
+@SuppressWarnings({"DuplicatedCode"})
 public class constFloat3x3 implements Cloneable<float3x3>, JsonSerializable {
+
+    static {
+        JsonDeserialization.register(constFloat3x3.class, json -> {
+            if(json.isArray()) {
+                if(json.get(0).isArray())
+                    return fromRows(json.get(0).as(float3.class), json.get(1).as(float3.class), json.get(2).as(float3.class));
+                return
+                        fromArray(json.as(float[].class));
+            }
+            if(json.contains("a"))
+                return new constFloat3x3(json.get("a").asFloat(), json.get("b").asFloat(), json.get("c").asFloat(),
+                        json.get("d").asFloat(), json.get("e").asFloat(), json.get("f").asFloat(),
+                        json.get("g").asFloat(), json.get("h").asFloat(), json.get("i").asFloat());
+            if(json.contains("a00"))
+                return new constFloat3x3(json.get("a00").asFloat(), json.get("a01").asFloat(), json.get("a02").asFloat(),
+                        json.get("a10").asFloat(), json.get("a11").asFloat(), json.get("a12").asFloat(),
+                        json.get("a20").asFloat(), json.get("a21").asFloat(), json.get("a22").asFloat());
+            if(json.contains("m00"))
+                return new constFloat3x3(json.get("m00").asFloat(), json.get("m01").asFloat(), json.get("m02").asFloat(),
+                        json.get("m10").asFloat(), json.get("m11").asFloat(), json.get("m12").asFloat(),
+                        json.get("m20").asFloat(), json.get("m21").asFloat(), json.get("m22").asFloat());
+            if(json.contains("a11"))
+                return new constFloat3x3(json.get("a11").asFloat(), json.get("a12").asFloat(), json.get("a13").asFloat(),
+                        json.get("a21").asFloat(), json.get("a22").asFloat(), json.get("a23").asFloat(),
+                        json.get("a31").asFloat(), json.get("a32").asFloat(), json.get("a33").asFloat());
+            return new constFloat3x3(json.get("m11").asFloat(), json.get("m12").asFloat(), json.get("m13").asFloat(),
+                    json.get("m21").asFloat(), json.get("m22").asFloat(), json.get("m23").asFloat(),
+                    json.get("m31").asFloat(), json.get("m32").asFloat(), json.get("m33").asFloat());
+        });
+    }
 
     /**
      * The zero matrix.
@@ -792,6 +823,83 @@ public class constFloat3x3 implements Cloneable<float3x3>, JsonSerializable {
                 a00 * v.x + a01 * v.y + a02 * v.z,
                 a10 * v.x + a11 * v.y + a12 * v.z,
                 a20 * v.x + a21 * v.y + a22 * v.z
+        );
+    }
+
+
+
+    /**
+     * Creates a new matrix with the given values for the diagonal entries, and
+     * all other components set to 0.
+     *
+     * @param a00 The value for the top left component
+     * @param a11 The value for the center component
+     * @param a22 The value for the bottom right component
+     * @return A diagonal matrix with the given component values
+     */
+    public static constFloat3x3 diag(float a00, float a11, float a22) {
+        return new constFloat3x3(a00, a11, a22);
+    }
+
+    /**
+     * Creates a new matrix from the given rows.
+     *
+     * @param r0 The first row of the matrix
+     * @param r1 The second row of the matrix
+     * @param r2 The third row of the matrix
+     * @return A new matrix from those rows
+     */
+    public static constFloat3x3 fromRows(constFloat3 r0, constFloat3 r1, constFloat3 r2) {
+        return new constFloat3x3(
+                r0.x, r0.y, r0.z,
+                r1.x, r1.y, r1.z,
+                r2.x, r2.y, r2.z
+        );
+    }
+
+    /**
+     * Creates a new matrix from the given columns.
+     *
+     * @param c0 The first column of the matrix
+     * @param c1 The second column of the matrix
+     * @param c2 The third column of the matrix
+     * @return A new matrix from those columns
+     */
+    public static constFloat3x3 fromColumns(constFloat3 c0, constFloat3 c1, constFloat3 c2) {
+        return new constFloat3x3(
+                c0.x, c1.x, c2.x,
+                c0.y, c1.y, c2.y,
+                c0.z, c1.z, c2.z
+        );
+    }
+
+    /**
+     * Creates a new matrix from the given array.
+     *
+     * @param components The components for the matrix, row by row. Must contain at least
+     *                   as many elements as the matrix will have components
+     * @return A new matrix with the specified components
+     */
+    public static constFloat3x3 fromArray(float[] components) {
+        return new constFloat3x3(
+                components[0], components[1], components[2],
+                components[3], components[4], components[5],
+                components[6], components[7], components[8]
+        );
+    }
+
+    /**
+     * Creates a new matrix by reading the component values from the given array.
+     *
+     * @param arr The array to read the components from
+     * @param offset The index of the top left component, then row by row
+     * @return A new matrix with the read components
+     */
+    public static constFloat3x3 fromArray(float[] arr, int offset) {
+        return new constFloat3x3(
+                arr[offset], arr[offset+1], arr[offset+2],
+                arr[offset+3], arr[offset+4], arr[offset+5],
+                arr[offset+6], arr[offset+7], arr[offset+8]
         );
     }
 }

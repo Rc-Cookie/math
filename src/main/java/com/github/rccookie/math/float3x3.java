@@ -1,5 +1,6 @@
 package com.github.rccookie.math;
 
+import com.github.rccookie.json.JsonDeserialization;
 import com.github.rccookie.util.ArgumentOutOfRangeException;
 
 import org.jetbrains.annotations.Range;
@@ -9,6 +10,35 @@ import org.jetbrains.annotations.Range;
  */
 @SuppressWarnings({"NewClassNamingConvention", "DuplicatedCode"})
 public final class float3x3 extends constFloat3x3 {
+
+    static {
+        JsonDeserialization.register(float3x3.class, json -> {
+            if(json.isArray()) {
+                if(json.get(0).isArray())
+                    return fromRows(json.get(0).as(float3.class), json.get(1).as(float3.class), json.get(2).as(float3.class));
+                return fromArray(json.as(float[].class));
+            }
+            if(json.contains("a"))
+                return new float3x3(json.get("a").asFloat(), json.get("b").asFloat(), json.get("c").asFloat(),
+                        json.get("d").asFloat(), json.get("e").asFloat(), json.get("f").asFloat(),
+                        json.get("g").asFloat(), json.get("h").asFloat(), json.get("i").asFloat());
+            if(json.contains("a00"))
+                return new float3x3(json.get("a00").asFloat(), json.get("a01").asFloat(), json.get("a02").asFloat(),
+                        json.get("a10").asFloat(), json.get("a11").asFloat(), json.get("a12").asFloat(),
+                        json.get("a20").asFloat(), json.get("a21").asFloat(), json.get("a22").asFloat());
+            if(json.contains("m00"))
+                return new float3x3(json.get("m00").asFloat(), json.get("m01").asFloat(), json.get("m02").asFloat(),
+                        json.get("m10").asFloat(), json.get("m11").asFloat(), json.get("m12").asFloat(),
+                        json.get("m20").asFloat(), json.get("m21").asFloat(), json.get("m22").asFloat());
+            if(json.contains("a11"))
+                return new float3x3(json.get("a11").asFloat(), json.get("a12").asFloat(), json.get("a13").asFloat(),
+                        json.get("a21").asFloat(), json.get("a22").asFloat(), json.get("a23").asFloat(),
+                        json.get("a31").asFloat(), json.get("a32").asFloat(), json.get("a33").asFloat());
+            return new float3x3(json.get("m11").asFloat(), json.get("m12").asFloat(), json.get("m13").asFloat(),
+                    json.get("m21").asFloat(), json.get("m22").asFloat(), json.get("m23").asFloat(),
+                    json.get("m31").asFloat(), json.get("m32").asFloat(), json.get("m33").asFloat());
+        });
+    }
 
     float3x3() { }
 
@@ -26,6 +56,8 @@ public final class float3x3 extends constFloat3x3 {
               a10, a11, a12,
               a20, a21, a22);
     }
+
+
 
     /**
      * Sets this matrix to the given component values.
@@ -63,6 +95,48 @@ public final class float3x3 extends constFloat3x3 {
         a20 = m.a20;
         a21 = m.a21;
         a22 = m.a22;
+        return this;
+    }
+
+    /**
+     * Sets this matrix to the specified values.
+     *
+     * @param row0 The component values for the first row
+     * @param row1 The component values for the second row
+     * @param row2 The component values for the third row
+     * @return This matrix
+     */
+    public float3x3 setRows(constFloat3 row0, constFloat3 row1, constFloat3 row2) {
+        this.a00 = row0.x;
+        this.a01 = row0.y;
+        this.a02 = row0.z;
+        this.a10 = row1.x;
+        this.a11 = row1.y;
+        this.a12 = row1.z;
+        this.a20 = row2.x;
+        this.a21 = row2.y;
+        this.a22 = row2.z;
+        return this;
+    }
+
+    /**
+     * Sets this matrix to the specified values.
+     *
+     * @param column0 The component values for the first column
+     * @param column1 The component values for the second column
+     * @param column2 The component values for the third column
+     * @return This matrix
+     */
+    public float3x3 setColumns(constFloat3 column0, constFloat3 column1, constFloat3 column2) {
+        this.a00 = column0.x;
+        this.a10 = column0.y;
+        this.a20 = column0.z;
+        this.a01 = column1.x;
+        this.a11 = column1.y;
+        this.a21 = column1.z;
+        this.a02 = column2.x;
+        this.a12 = column2.y;
+        this.a22 = column2.z;
         return this;
     }
 
@@ -539,10 +613,9 @@ public final class float3x3 extends constFloat3x3 {
      * @param r0 The first row of the matrix
      * @param r1 The second row of the matrix
      * @param r2 The third row of the matrix
-     * @param r3 The forth row of the matrix
      * @return A new matrix from those rows
      */
-    public static float3x3 fromRows(constFloat3 r0, constFloat3 r1, constFloat3 r2, constFloat3 r3) {
+    public static float3x3 fromRows(constFloat3 r0, constFloat3 r1, constFloat3 r2) {
         return new float3x3(
                 r0.x, r0.y, r0.z,
                 r1.x, r1.y, r1.z,
@@ -556,10 +629,9 @@ public final class float3x3 extends constFloat3x3 {
      * @param c0 The first column of the matrix
      * @param c1 The second column of the matrix
      * @param c2 The third column of the matrix
-     * @param c3 The forth column of the matrix
      * @return A new matrix from those columns
      */
-    public static float3x3 fromColumns(constFloat3 c0, constFloat3 c1, constFloat3 c2, constFloat3 c3) {
+    public static float3x3 fromColumns(constFloat3 c0, constFloat3 c1, constFloat3 c2) {
         return new float3x3(
                 c0.x, c1.x, c2.x,
                 c0.y, c1.y, c2.y,

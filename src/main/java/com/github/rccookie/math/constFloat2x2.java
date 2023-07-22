@@ -3,6 +3,7 @@ package com.github.rccookie.math;
 import java.util.Arrays;
 
 import com.github.rccookie.json.JsonArray;
+import com.github.rccookie.json.JsonDeserialization;
 import com.github.rccookie.json.JsonSerializable;
 import com.github.rccookie.util.ArgumentOutOfRangeException;
 import com.github.rccookie.util.Cloneable;
@@ -15,8 +16,32 @@ import static java.lang.Math.abs;
 /**
  * A 2x2 float matrix with read-only access.
  */
-@SuppressWarnings({"NewClassNamingConvention", "DuplicatedCode"})
+@SuppressWarnings({"DuplicatedCode"})
 public class constFloat2x2 implements Cloneable<float2x2>, JsonSerializable {
+
+    static {
+        JsonDeserialization.register(constFloat2x2.class, json -> {
+            if(json.isArray()) {
+                if(json.get(0).isArray())
+                    return fromRows(json.get(0).as(float2.class), json.get(1).as(float2.class));
+                return fromArray(json.as(float[].class));
+            }
+            if(json.contains("a"))
+                return new constFloat2x2(json.get("a").asFloat(), json.get("b").asFloat(),
+                                         json.get("c").asFloat(), json.get("d").asFloat());
+            if(json.contains("a00"))
+                return new constFloat2x2(json.get("a00").asFloat(), json.get("a01").asFloat(),
+                                         json.get("a10").asFloat(), json.get("a11").asFloat());
+            if(json.contains("m00"))
+                return new constFloat2x2(json.get("m00").asFloat(), json.get("m01").asFloat(),
+                                         json.get("m10").asFloat(), json.get("m11").asFloat());
+            if(json.contains("a11"))
+                return new constFloat2x2(json.get("a11").asFloat(), json.get("a12").asFloat(),
+                                         json.get("a21").asFloat(), json.get("a22").asFloat());
+            return new constFloat2x2(json.get("m11").asFloat(), json.get("m12").asFloat(),
+                                     json.get("m21").asFloat(), json.get("m22").asFloat());
+        });
+    }
 
     /**
      * The zero matrix.
@@ -550,5 +575,63 @@ public class constFloat2x2 implements Cloneable<float2x2>, JsonSerializable {
      */
     public final float2 mult(constFloat2 v) {
         return new float2(a*v.x + b*v.y, c*v.x + d*v.y);
+    }
+
+
+
+    /**
+     * Creates a new matrix with the given values for the diagonal entries, and
+     * all other components set to 0.
+     *
+     * @param a The top left component value
+     * @param d The bottom right component value
+     * @return A diagonal matrix with the given component values
+     */
+    public static constFloat2x2 diag(float a, float d) {
+        return new constFloat2x2(a,0,0,d);
+    }
+
+    /**
+     * Creates a new matrix from the given rows.
+     *
+     * @param t The top row
+     * @param b The bottom row
+     * @return A new matrix from those rows
+     */
+    public static constFloat2x2 fromRows(constFloat2 t, constFloat2 b) {
+        return new constFloat2x2(t.x, t.y, b.x, b.y);
+    }
+
+    /**
+     * Creates a new matrix from the given columns.
+     *
+     * @param l The left column
+     * @param r The right column
+     * @return A new matrix from those columns
+     */
+    public static constFloat2x2 fromColumns(constFloat2 l, constFloat2 r) {
+        return new constFloat2x2(l.x, r.x, r.y, r.y);
+    }
+
+    /**
+     * Creates a new matrix from the given array.
+     *
+     * @param components The components for the matrix, row by row. Must contain at least
+     *                   as many elements as the matrix will have components
+     * @return A new matrix with the specified components
+     */
+    public static constFloat2x2 fromArray(float[] components) {
+        return new constFloat2x2(components[0], components[1], components[2], components[3]);
+    }
+
+    /**
+     * Creates a new matrix by reading the component values from the given array.
+     *
+     * @param arr The array to read the components from
+     * @param offset The index of the top left component, then row by row
+     * @return A new matrix with the read components
+     */
+    public static constFloat2x2 fromArray(float[] arr, int offset) {
+        return new constFloat2x2(arr[offset], arr[offset+1], arr[offset+2], arr[offset+3]);
     }
 }

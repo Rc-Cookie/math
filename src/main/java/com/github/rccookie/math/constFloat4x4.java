@@ -3,6 +3,7 @@ package com.github.rccookie.math;
 import java.util.Arrays;
 
 import com.github.rccookie.json.JsonArray;
+import com.github.rccookie.json.JsonDeserialization;
 import com.github.rccookie.json.JsonSerializable;
 import com.github.rccookie.util.ArgumentOutOfRangeException;
 import com.github.rccookie.util.Cloneable;
@@ -15,8 +16,42 @@ import static java.lang.Math.abs;
 /**
  * A 4x4 float matrix with read-only access.
  */
-@SuppressWarnings({"NewClassNamingConvention", "DuplicatedCode"})
+@SuppressWarnings({"DuplicatedCode"})
 public class constFloat4x4 implements Cloneable<float4x4>, JsonSerializable {
+
+    static {
+        JsonDeserialization.register(constFloat4x4.class, json -> {
+            if(json.isArray()) {
+                if(json.get(0).isArray())
+                    return fromRows(json.get(0).as(float4.class), json.get(1).as(float4.class), json.get(2).as(float4.class), json.get(3).as(float4.class));
+                return fromArray(json.as(float[].class));
+            }
+            if(json.contains("a"))
+                return new constFloat4x4(json.get("a").asFloat(), json.get("b").asFloat(), json.get("c").asFloat(), json.get("d").asFloat(),
+                        json.get("e").asFloat(), json.get("f").asFloat(), json.get("g").asFloat(), json.get("h").asFloat(),
+                        json.get("i").asFloat(), json.get("j").asFloat(), json.get("k").asFloat(), json.get("l").asFloat(),
+                        json.get("m").asFloat(), json.get("n").asFloat(), json.get("o").asFloat(), json.get("p").asFloat());
+            if(json.contains("a00"))
+                return new constFloat4x4(json.get("a00").asFloat(), json.get("a01").asFloat(), json.get("a02").asFloat(), json.get("a03").asFloat(),
+                        json.get("a10").asFloat(), json.get("a11").asFloat(), json.get("a12").asFloat(), json.get("a13").asFloat(),
+                        json.get("a20").asFloat(), json.get("a21").asFloat(), json.get("a22").asFloat(), json.get("a23").asFloat(),
+                        json.get("a30").asFloat(), json.get("a31").asFloat(), json.get("a32").asFloat(), json.get("a33").asFloat());
+            if(json.contains("m00"))
+                return new constFloat4x4(json.get("m00").asFloat(), json.get("m01").asFloat(), json.get("m02").asFloat(), json.get("m03").asFloat(),
+                        json.get("m10").asFloat(), json.get("m11").asFloat(), json.get("m12").asFloat(), json.get("m13").asFloat(),
+                        json.get("m20").asFloat(), json.get("m21").asFloat(), json.get("m22").asFloat(), json.get("m23").asFloat(),
+                        json.get("m30").asFloat(), json.get("m31").asFloat(), json.get("m32").asFloat(), json.get("m33").asFloat());
+            if(json.contains("a11"))
+                return new constFloat4x4(json.get("a11").asFloat(), json.get("a12").asFloat(), json.get("a13").asFloat(), json.get("a14").asFloat(),
+                        json.get("a21").asFloat(), json.get("a22").asFloat(), json.get("a23").asFloat(), json.get("a24").asFloat(),
+                        json.get("a31").asFloat(), json.get("a32").asFloat(), json.get("a33").asFloat(), json.get("a34").asFloat(),
+                        json.get("a41").asFloat(), json.get("a42").asFloat(), json.get("a43").asFloat(), json.get("a44").asFloat());
+            return new constFloat4x4(json.get("m11").asFloat(), json.get("m12").asFloat(), json.get("m13").asFloat(), json.get("m14").asFloat(),
+                    json.get("m21").asFloat(), json.get("m22").asFloat(), json.get("m23").asFloat(), json.get("m24").asFloat(),
+                    json.get("m31").asFloat(), json.get("m32").asFloat(), json.get("m33").asFloat(), json.get("m34").asFloat(),
+                    json.get("m41").asFloat(), json.get("m42").asFloat(), json.get("m43").asFloat(), json.get("m44").asFloat());
+        });
+    }
 
     /**
      * The zero matrix.
@@ -78,6 +113,33 @@ public class constFloat4x4 implements Cloneable<float4x4>, JsonSerializable {
         this.a31 = a31;
         this.a32 = a32;
         this.a33 = a33;
+    }
+
+    /**
+     * Creates a new matrix.
+     *
+     * @param row0 The components for the first row
+     * @param row1 The components for the second row
+     * @param row2 The components for the third row
+     * @param row3 The components for the fourth row
+     */
+    public constFloat4x4(constFloat4 row0, constFloat4 row1, constFloat4 row2, constFloat4 row3) {
+        this.a00 = row0.x;
+        this.a01 = row0.y;
+        this.a02 = row0.z;
+        this.a03 = row0.w;
+        this.a10 = row1.x;
+        this.a11 = row1.y;
+        this.a12 = row1.z;
+        this.a13 = row1.w;
+        this.a20 = row2.x;
+        this.a21 = row2.y;
+        this.a22 = row2.z;
+        this.a23 = row2.w;
+        this.a30 = row3.x;
+        this.a31 = row3.y;
+        this.a32 = row3.z;
+        this.a33 = row3.w;
     }
 
 
@@ -1056,6 +1118,90 @@ public class constFloat4x4 implements Cloneable<float4x4>, JsonSerializable {
                 a10 * v.x + a11 * v.y + a12 * v.z + a13 * v.w,
                 a20 * v.x + a21 * v.y + a22 * v.z + a23 * v.w,
                 a30 * v.x + a31 * v.y + a32 * v.z + a33 * v.w
+        );
+    }
+
+
+
+    /**
+     * Creates a new matrix with the given values for the diagonal entries, and
+     * all other components set to 0.
+     *
+     * @param a00 The value for the component in the first row and column
+     * @param a11 The value for the component in the second row and column
+     * @param a22 The value for the component in the third row and column
+     * @param a33 The value for the component in the fourth row and column
+     * @return A diagonal matrix with the given component values
+     */
+    public static constFloat4x4 diag(float a00, float a11, float a22, float a33) {
+        return new constFloat4x4(a00, a11, a22, a33);
+    }
+
+    /**
+     * Creates a new matrix from the given rows.
+     *
+     * @param r0 The first row of the matrix
+     * @param r1 The second row of the matrix
+     * @param r2 The third row of the matrix
+     * @param r3 The forth row of the matrix
+     * @return A new matrix from those rows
+     */
+    public static constFloat4x4 fromRows(constFloat4 r0, constFloat4 r1, constFloat4 r2, constFloat4 r3) {
+        return new constFloat4x4(
+                r0.x, r0.y, r0.z, r0.w,
+                r1.x, r1.y, r1.z, r1.w,
+                r2.x, r2.y, r2.z, r2.w,
+                r3.x, r3.y, r3.z, r3.w
+        );
+    }
+
+    /**
+     * Creates a new matrix from the given columns.
+     *
+     * @param c0 The first column of the matrix
+     * @param c1 The second column of the matrix
+     * @param c2 The third column of the matrix
+     * @param c3 The forth column of the matrix
+     * @return A new matrix from those columns
+     */
+    public static constFloat4x4 fromColumns(constFloat4 c0, constFloat4 c1, constFloat4 c2, constFloat4 c3) {
+        return new constFloat4x4(
+                c0.x, c1.x, c2.x, c3.x,
+                c0.y, c1.y, c2.y, c3.y,
+                c0.z, c1.z, c2.z, c3.z,
+                c0.w, c1.w, c2.w, c3.w
+        );
+    }
+
+    /**
+     * Creates a new matrix from the given array.
+     *
+     * @param components The components for the matrix, row by row. Must contain at least
+     *                   as many elements as the matrix will have components
+     * @return A new matrix with the specified components
+     */
+    public static constFloat4x4 fromArray(float[] components) {
+        return new constFloat4x4(
+                components[0], components[1], components[2], components[3],
+                components[4], components[5], components[6], components[7],
+                components[8], components[9], components[10], components[11],
+                components[12], components[13], components[14], components[15]
+        );
+    }
+
+    /**
+     * Creates a new matrix by reading the component values from the given array.
+     *
+     * @param arr The array to read the components from
+     * @param offset The index of the top left component, then row by row
+     * @return A new matrix with the read components
+     */
+    public static constFloat4x4 fromArray(float[] arr, int offset) {
+        return new constFloat4x4(
+                arr[offset], arr[offset+1], arr[offset+2], arr[offset+3],
+                arr[offset+4], arr[offset+5], arr[offset+6], arr[offset+7],
+                arr[offset+8], arr[offset+9], arr[offset+10], arr[offset+11],
+                arr[offset+12], arr[offset+13], arr[offset+14], arr[offset+15]
         );
     }
 }

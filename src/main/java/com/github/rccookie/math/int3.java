@@ -13,10 +13,14 @@ import org.jetbrains.annotations.Range;
 public final class int3 extends constInt3 {
 
     static {
-        JsonDeserialization.register(int3.class, json -> new int3(
+        JsonDeserialization.register(int3.class, json -> json.isArray() ? new int3(
                 json.get(0).asInt(),
                 json.get(1).asInt(),
                 json.get(2).asInt()
+        ) : new int3(
+                json.get("x").asInt(),
+                json.get("y").asInt(),
+                json.get("z").asInt()
         ));
     }
 
